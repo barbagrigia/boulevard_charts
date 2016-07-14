@@ -1,0 +1,148 @@
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+  outline: none;
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+html { height: 99%; }
+body {
+  font-family: KievitPro, Open Sans, Helvetica, sans-serif;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #41444a;
+  overflow: hidden;
+  -webkit-font-feature-settings: "liga" 1, "lnum" 1, "tnum" 1;
+  font-feature-settings: "liga" 1, "tnum" 1, "lnum" 1;
+  -webkit-font-smoothing: antialiased;
+  padding-top: 1rem; /* prevents tooltips from getting cut off */
+}
+
+.bar {
+  shape-rendering: crispEdges;
+  fill: url(#Gradient); /*linear-gradient(to top, #d44061, #b538a8); */
+}
+
+.bar:hover {
+  fill: url(#HoverGradient); /*linear-gradient(to top, #d85574, #bf4cb3); */
+}
+
+.axis {
+  font-size: 12px;
+  fill: #707070;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.x.axis path {
+  stroke: black;
+}
+
+.d3-tip {
+  font-size: 0.9rem;
+  line-height: 1.25;
+  font-weight: 400;
+  padding: 0.2rem 0.75rem 0.3rem;
+  background: #323232;
+  color: #fff;
+  border-radius: 2px;
+  pointer-events: none;
+  text-align: center;
+}
+
+.d3-tip .date {
+  font-size: 0.6rem;
+  font-weight: bold;
+}
+
+/* Creates a small triangle extender for the tooltip */
+.d3-tip:after {
+  box-sizing: border-box;
+  display: inline;
+  font-size: 10px;
+  width: 100%;
+  line-height: 1;
+  color: #323232;
+  position: absolute;
+  pointer-events: none;
+}
+
+/* Northward tooltips */
+.d3-tip.n:after {
+  content: "\25BE";
+  margin: -4px 0 0 0;
+  top: 100%;
+  left: 0;
+  text-align: center;
+}
+
+/* Eastward tooltips */
+.d3-tip.e:after {
+  content: "\25C0";
+  margin: -4px 0 0 0;
+  top: 50%;
+  left: -8px;
+}
+
+/* Southward tooltips */
+.d3-tip.s:after {
+  content: "\25B2";
+  margin: 0 0 1px 0;
+  top: -8px;
+  left: 0;
+  text-align: center;
+}
+
+/* Westward tooltips */
+.d3-tip.w:after {
+  content: "\25B6";
+  margin: -4px 0 0 -1px;
+  top: 50%;
+  left: 100%;
+}
+
+/* PIE CHART */
+polyline{
+	opacity: .3;
+	stroke: black;
+	stroke-width: 2px;
+	fill: none;
+}
+
+.labelValue
+{
+	font-size: 60%;
+	opacity: .5;
+}
+
+.toolTip {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  position: absolute;
+  display: none;
+  width: auto;
+  height: auto;
+  background: none repeat scroll 0 0 white;
+  border: 0 none;
+  border-radius: 8px 8px 8px 8px;
+  box-shadow: -3px 3px 15px #888888;
+  color: black;
+  font: 12px sans-serif;
+  padding: 5px;
+  text-align: center;
+}

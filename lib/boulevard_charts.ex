@@ -1,0 +1,2 @@
+defmodule BoulevardCharts do
+end
