@@ -1,0 +1,33 @@
+{
+  "name": "boulevard_charts",
+  "version": "0.0.1",
+  "description": "A framework for embedding charts into an application through iframes.",
+  "magin": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "start": "brunch watch --server",
+    "prod": "brunch build --production"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Boulevard/boulevard_charts.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Boulevard/boulevard_charts/issues"
+  },
+  "homepage": "https://github.com/Boulevard/boulevard_charts#readme",
+  "devDependencies": {
+    "auto-reload-brunch": "^2.0.0",
+    "babel-brunch": "~6.0.0",
+    "babel-preset-es2015": "~6.3.13",
+    "brunch": "^2.4.0",
+    "clean-css-brunch": "^2.0.0",
+    "css-brunch": "^2.0.0",
+    "javascript-brunch": "^2.0.0",
+    "uglify-js-brunch": "^2.0.0"
+  }
+}
