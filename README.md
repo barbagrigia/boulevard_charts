@@ -12,7 +12,7 @@ If [available in Hex](https://hex.pm/docs/publish), the package can be installed
 
     ```elixir
     def deps do
-      [{:boulevard_charts, "~> 0.0.1"}]
+      [{:boulevard_charts, github: "Boulevard/boulevard_charts"}]
     end
     ```
 
