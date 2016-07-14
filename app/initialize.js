@@ -31,7 +31,7 @@ function drawAll(svg) {
       columnChart(chartObj, svg);
     }
 
-    chartObj.processData(data.data);
+    chartObj.processData(data);
   }
 
   if (savedData) {

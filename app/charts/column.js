@@ -52,6 +52,7 @@ module.exports = function columnChart(chart, svg) {
 
 
   chart.processData = function(data) {
+    data = data.data;
     x.domain(data.map(function(d) { return d.date; }));
 
     // Apply X-Axis

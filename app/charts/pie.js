@@ -48,35 +48,41 @@ module.exports = function pieChart(chart, svg) {
   	.range(colorRange.range());
 
   chart.processData = function(data) {
+    var aggregationKey = data.aggregation.key;
+    var aggregate = data.aggregation.aggregate;
+
     function groupData(d) {
       var rollup = {};
       var point;
-      var totalGrossServiceRevenue = 0;
+      var totalAggregate = 0;
+
       for (var i = 0; i < d.length; i++) {
         point = d[i];
-        totalGrossServiceRevenue += point.grossServiceRevenue;
-        rollup[point.categoryName] = (rollup[point.categoryName] || 0) + point.grossServiceRevenue;
+        totalAggregate += point[aggregate];
+        rollup[point[aggregationKey]] = (rollup[point[aggregationKey]] || 0) + point[aggregate];
       }
 
       var res = [];
 
-      Object.keys(rollup).forEach(function(key) {
-        var percentage = Math.round(1000.0 * rollup[key] / totalGrossServiceRevenue) / 10.0;
-        res.push({categoryName: key, grossServiceRevenue: rollup[key], percentage: percentage});
+      Object.keys(rollup).forEach(function(aggregateKeyValue) {
+        var percentage = Math.round(1000.0 * rollup[aggregateKeyValue] / totalAggregate) / 10.0;
+        var row = {grossServiceRevenue: rollup[aggregateKeyValue], percentage: percentage};
+        row[aggregationKey] = aggregateKeyValue;
+        res.push(row);
       });
 
       return res;
     };
 
-    data = groupData(data);
+    data = groupData(data.data);
 
   	/* ------- PIE SLICES -------*/
   	var slice = svg.select(".slices").selectAll("path.slice")
-      .data(pie(data), function(d){ return d.data.categoryName });
+      .data(pie(data), function(d){ return d.data[aggregationKey] });
 
     slice.enter()
       .insert("path")
-      .style("fill", function(d) { return color(d.data.categoryName); })
+      .style("fill", function(d) { return color(d.data[aggregationKey]); })
       .attr("class", "slice");
 
     slice
@@ -94,7 +100,7 @@ module.exports = function pieChart(chart, svg) {
         div.style("left", d3.event.pageX+10+"px");
         div.style("top", d3.event.pageY-25+"px");
         div.style("display", "inline-block");
-        div.html((d.data.categoryName)+"<br> $"+Formatters.formatMoney(d.data.grossServiceRevenue));
+        div.html((d.data[aggregationKey])+"<br> $"+Formatters.formatMoney(d.data[aggregate]));
       });
     slice
       .on("mouseout", function(d){
@@ -134,13 +140,13 @@ module.exports = function pieChart(chart, svg) {
     /* ------- TEXT LABELS -------*/
 
     var text = svg.select(".labelName").selectAll("text")
-      .data(pie(data), function(d){ return d.data.categoryName });
+      .data(pie(data), function(d){ return d.data[aggregationKey] });
 
     text.enter()
       .append("text")
       .attr("dy", ".35em")
       .text(function(d) {
-        return (d.data.categoryName+": "+d.data.percentage+"%");
+        return (d.data[aggregationKey]+": "+d.data.percentage+"%");
       });
 
     function midAngle(d){
@@ -170,7 +176,7 @@ module.exports = function pieChart(chart, svg) {
         };
       })
       .text(function(d) {
-        return (d.data.categoryName+": "+d.data.percentage+"%");
+        return (d.data[aggregationKey]+": "+d.data.percentage+"%");
       });
 
 
@@ -180,7 +186,7 @@ module.exports = function pieChart(chart, svg) {
     /* ------- SLICE TO TEXT POLYLINES -------*/
 
     var polyline = svg.select(".lines").selectAll("polyline")
-      .data(pie(data), function(d){ return d.data.categoryName });
+      .data(pie(data), function(d){ return d.data[aggregationKey] });
 
     polyline.enter()
       .append("polyline");
