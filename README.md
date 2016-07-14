@@ -1,6 +1,8 @@
-# BoulevardCharts
+## Boulevard Charts
 
-**TODO: Add description**
+A framework for embedding charts into an application through iframes.
+
+Not ready for general usage yet.
 
 ## Installation
 
