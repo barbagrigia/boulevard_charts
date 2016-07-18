@@ -22,22 +22,42 @@ module.exports = function columnChart(chart, svg) {
 
   var y = d3.scaleLinear().rangeRound([chart.height, 0]);
 
-
   var tooltipDiv = d3.select("body").append("div").attr("class", "d3-tip");
-  function tooltipFn(data) {
-    var isoDay = data.date;
-    var d = new Date(Date.parse(isoDay));
-    var month = monthsOfYear[d.getUTCMonth()];
-    var dateString = month + ' ' + d.getUTCDate();
-    return '<span class=\'date\'>' + dateString + '</span>' + '<br/><span> $' + Formatters.formatMoney(data.total) + '</span>'
+
+  function pluralize(value, labels) {
+    return `${value} ${value === 1 ? labels.singular : labels.plural}`;
+  }
+
+  function tooltipFn(data, meta) {
+    var tip = ''
+    if (meta.x.datatype === 'date') {
+      var isoDay = data.date;
+      var d = new Date(Date.parse(isoDay));
+      var month = monthsOfYear[d.getUTCMonth()];
+      var dateString = month + ' ' + d.getUTCDate();
+      tip += `<span class='date'>${dateString}</span><br/>`;
+    } else {
+      tip += `<span class='date'>${pluralize(data.visits, meta.x.label)}</span><br/>`;
+    }
+
+    if (meta.y.datatype === 'money') {
+      tip += `<span>$${Formatters.formatMoney(data.total)}</span>`
+    } else {
+      tip += `<span>${data[meta.y.property]}</span>`;
+    }
+
+    return tip;
   }
 
   var stack = d3.stack();
 
-  chart.processData = function(data) {
-    data = data.data;
-    x.domain(data.map(function(d) { return d.date; }));
-    y.domain([0, d3.max(data, function(d) { return Number(d.total); })]).nice();
+  chart.processData = function(chartDescription) {
+    var data = chartDescription.data;
+    var yKey = chartDescription.meta.y;
+    var xKey = chartDescription.meta.x;
+
+    x.domain(data.map(function(d) { return d[xKey.property]; }));
+    y.domain([0, d3.max(data, function(d) { return Number(d[yKey.property]); })]).nice();
 
     var defs = svg.append('defs');
     var grad = defs.append('linearGradient')
@@ -65,15 +85,15 @@ module.exports = function columnChart(chart, svg) {
     g.selectAll(".bar")
       .data(data)
       .enter().append("rect").attr('class', 'bar')
-        .attr("x", function(d) { return x(d.date); })
-        .attr("y", function(d) { console.log(d); return y(d.total); })
-        .attr("height", function(d) { return chart.height - y(Number(d.total)); })
+        .attr("x", function(d) { return x(d[xKey.property]); })
+        .attr("y", function(d) { return y(d[yKey.property]); })
+        .attr("height", function(d) { return chart.height - y(Number(d[yKey.property])); })
         .attr("width", x.bandwidth())
         .on("mousemove", function(d){
           tooltipDiv.style("left", d3.event.pageX+10+"px");
           tooltipDiv.style("top", d3.event.pageY-25+"px");
           tooltipDiv.style("display", "inline-block");
-          tooltipDiv.html(tooltipFn(d));
+          tooltipDiv.html(tooltipFn(d, chartDescription.meta));
         })
         .on("mouseout", function(d){
           tooltipDiv.style("display", "none");
@@ -82,26 +102,32 @@ module.exports = function columnChart(chart, svg) {
     g.append("g")
      .attr("class", "axis axis--x")
      .attr("transform", "translate(0," + chart.height + ")")
-     .call(d3.axisBottom(x).tickFormat(function(isoDay) {
-       var d = new Date(Date.parse(isoDay));
+     .call(d3.axisBottom(x).tickFormat(function(xValue) {
+       if (xKey.datatype === 'date') {
+         var d = new Date(Date.parse(xValue));
 
-       if (d.getUTCDay() === 0) {
-         var month = monthsOfYear[d.getUTCMonth()];
-         return month + ' ' + d.getUTCDate();
+         if (d.getUTCDay() === 0) {
+           var month = monthsOfYear[d.getUTCMonth()];
+           return month + ' ' + d.getUTCDate();
+         }
+       } else {
+         return xValue;
        }
      }));
 
-     // Hide some tick lines
-     d3.selectAll('g.axis--x g.tick line')
-       .attr('y2', function(isoDay){
-         var d = new Date(Date.parse(isoDay));
+     if (xKey.datatype === 'date') {
+       // Hide some tick lines
+       d3.selectAll('g.axis--x g.tick line')
+         .attr('y2', function(isoDay){
+           var d = new Date(Date.parse(isoDay));
 
-         if (d.getUTCDay() === 0) {
-           return 6;
-         } else {
-           return 0;
-         }
-       });
+           if (d.getUTCDay() === 0) {
+             return 6;
+           } else {
+             return 0;
+           }
+         });
+     }
 
     EventBus.emit({source: 'blvd:charts', message: 'ready'});
   };

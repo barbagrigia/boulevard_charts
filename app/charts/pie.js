@@ -49,8 +49,8 @@ module.exports = function pieChart(chart, svg) {
   }
 
   chart.processData = function(data) {
-    var aggregationKey = data.aggregation.key;
-    var aggregate = data.aggregation.aggregate;
+    var aggregationKey = data.meta.key;
+    var aggregate = data.meta.aggregate;
 
     function groupData(d) {
       var rollup = {};
