@@ -36,7 +36,7 @@ body {
   fill: url(#HoverGradient); /*linear-gradient(to top, #d85574, #bf4cb3); */
 }
 
-.axis {
+.axis text {
   font-size: 12px;
   fill: #707070;
   font-weight: bold;
@@ -50,7 +50,7 @@ body {
   shape-rendering: crispEdges;
 }
 
-.x.axis path {
+.axis--x path {
   stroke: black;
 }
 
@@ -130,20 +130,4 @@ polyline{
 {
 	font-size: 60%;
 	opacity: .5;
-}
-
-.toolTip {
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  position: absolute;
-  display: none;
-  width: auto;
-  height: auto;
-  background: none repeat scroll 0 0 white;
-  border: 0 none;
-  border-radius: 8px 8px 8px 8px;
-  box-shadow: -3px 3px 15px #888888;
-  color: black;
-  font: 12px sans-serif;
-  padding: 5px;
-  text-align: center;
 }

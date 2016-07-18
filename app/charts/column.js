@@ -10,26 +10,20 @@ module.exports = function columnChart(chart, svg) {
   svg.attr('width', chart.width + chart.margin.left + chart.margin.right)
      .attr('height', chart.height + chart.margin.top + chart.margin.bottom);
 
-  svg = svg.append('g')
+  var g = svg.append('g')
     .attr('transform', 'translate(' + chart.margin.left + ',' + chart.margin.top + ')');
 
   var monthsOfYear = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-  var x = d3.scale.ordinal().rangeRoundBands([0, chart.width], .1);
-  var y = d3.scale.linear().range([chart.height, 0]);
+  var x = d3.scaleBand()
+    .rangeRound([0, chart.width])
+    .padding(0.1)
+    .align(0.1);
 
-  var xAxis = d3.svg.axis()
-    .scale(x)
-    .tickFormat(function(isoDay) {
-      var d = new Date(Date.parse(isoDay));
+  var y = d3.scaleLinear().rangeRound([chart.height, 0]);
 
-      if (d.getUTCDay() === 0) {
-        var month = monthsOfYear[d.getUTCMonth()];
-        return month + ' ' + d.getUTCDate();
-      }
-    })
-    .orient('bottom');
 
+  var tooltipDiv = d3.select("body").append("div").attr("class", "d3-tip");
   function tooltipFn(data) {
     var isoDay = data.date;
     var d = new Date(Date.parse(isoDay));
@@ -38,55 +32,12 @@ module.exports = function columnChart(chart, svg) {
     return '<span class=\'date\'>' + dateString + '</span>' + '<br/><span> $' + Formatters.formatMoney(data.total) + '</span>'
   }
 
-  //
-  // var tip = d3.tip()
-  //   .attr('class', 'd3-tip')
-  //   .offset([-10, 0])
-  //   .html(tooltipFn);
-  //
-  // svg.call(tip);
-
-  var tooltipDiv = d3.select("body").append("div").attr("class", "d3-tip");
+  var stack = d3.stack();
 
   chart.processData = function(data) {
     data = data.data;
     x.domain(data.map(function(d) { return d.date; }));
-
-    // Apply X-Axis
-    svg.append('g')
-        .attr('class', 'x axis')
-        .attr('transform', 'translate(0,' + chart.height + ')')
-        .call(xAxis)
-      .selectAll('text')
-        .attr('y', 14)
-        .attr('x', 0)
-        .attr('dy', '.35em')
-        // .attr('transform', 'rotate(45)')
-        .style('text-anchor', 'middle');
-
-    // Hide some tick lines
-    d3.selectAll('g.x.axis g.tick line')
-      .attr('y2', function(isoDay){
-        var d = new Date(Date.parse(isoDay));
-
-        if (d.getUTCDay() === 0) {
-          return 6;
-        } else {
-          return 0;
-        }
-      });
-
-    y.domain([0, d3.max(data, function(d) { return Number(d.total); })]);
-    // Apply yAxis
-    // svg.append('g')
-    //     .attr('class', 'y axis')
-    //     .call(yAxis)
-    //   .append('text')
-    //     .attr('transform', 'rotate(-90)')
-    //     .attr('y', 6)
-    //     .attr('dy', '.71em')
-    //     .style('text-anchor', 'end')
-    //     .text('Earnings ($)');
+    y.domain([0, d3.max(data, function(d) { return Number(d.total); })]).nice();
 
     var defs = svg.append('defs');
     var grad = defs.append('linearGradient')
@@ -111,28 +62,46 @@ module.exports = function columnChart(chart, svg) {
     grad2.append('stop').attr('offset', '0%').attr('stop-color', '#d85574')
     grad2.append('stop').attr('offset', '100%').attr('stop-color', '#bf4cb3');
 
-    svg.selectAll('.bar')
+    g.selectAll(".bar")
       .data(data)
-    .enter().append('rect')
-      .attr('class', 'bar')
-      .attr('x', function(d) { return x(d.date); })
-      .attr('width', x.rangeBand())
-      // .attr('y', function(d) { return Math.min(height - 5, y(Number(d.total))); })
-      // .attr('height', function(d) { return Math.max(5, height - y(Number(d.total))); })
-      .attr('y', function(d) { return y(Number(d.total)); })
-      .attr('height', function(d) { return chart.height - y(Number(d.total)); })
-      .on("mousemove", function(d){
-        tooltipDiv.style("left", d3.event.pageX+10+"px");
-        tooltipDiv.style("top", d3.event.pageY-25+"px");
-        tooltipDiv.style("display", "inline-block");
-        tooltipDiv.html(tooltipFn(d));
-      })
-      .on("mouseout", function(d){
-        tooltipDiv.style("display", "none");
-      });
+      .enter().append("rect").attr('class', 'bar')
+        .attr("x", function(d) { return x(d.date); })
+        .attr("y", function(d) { console.log(d); return y(d.total); })
+        .attr("height", function(d) { return chart.height - y(Number(d.total)); })
+        .attr("width", x.bandwidth())
+        .on("mousemove", function(d){
+          tooltipDiv.style("left", d3.event.pageX+10+"px");
+          tooltipDiv.style("top", d3.event.pageY-25+"px");
+          tooltipDiv.style("display", "inline-block");
+          tooltipDiv.html(tooltipFn(d));
+        })
+        .on("mouseout", function(d){
+          tooltipDiv.style("display", "none");
+        });
 
-      // .on('mouseover', tip.show)
-      // .on('mouseout', tip.hide)
+    g.append("g")
+     .attr("class", "axis axis--x")
+     .attr("transform", "translate(0," + chart.height + ")")
+     .call(d3.axisBottom(x).tickFormat(function(isoDay) {
+       var d = new Date(Date.parse(isoDay));
+
+       if (d.getUTCDay() === 0) {
+         var month = monthsOfYear[d.getUTCMonth()];
+         return month + ' ' + d.getUTCDate();
+       }
+     }));
+
+     // Hide some tick lines
+     d3.selectAll('g.axis--x g.tick line')
+       .attr('y2', function(isoDay){
+         var d = new Date(Date.parse(isoDay));
+
+         if (d.getUTCDay() === 0) {
+           return 6;
+         } else {
+           return 0;
+         }
+       });
 
     EventBus.emit({source: 'blvd:charts', message: 'ready'});
   };
