@@ -1,7 +1,6 @@
 defmodule BoulevardCharts.Template do
   require EEx
 
-
   template_filename = Path.join(__DIR__, "./templates/frame.html.eex")
   @external_resource template_filename
   EEx.function_from_file :def, :template, template_filename, []

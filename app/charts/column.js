@@ -30,11 +30,6 @@ module.exports = function columnChart(chart, svg) {
     })
     .orient('bottom');
 
-  // var yAxis = d3.svg.axis()
-  //     .scale(y)
-  //     .orient('left')
-  //     .ticks(10, '$');
-
   function tooltipFn(data) {
     var isoDay = data.date;
     var d = new Date(Date.parse(isoDay));
@@ -43,13 +38,15 @@ module.exports = function columnChart(chart, svg) {
     return '<span class=\'date\'>' + dateString + '</span>' + '<br/><span> $' + Formatters.formatMoney(data.total) + '</span>'
   }
 
-  var tip = d3.tip()
-    .attr('class', 'd3-tip')
-    .offset([-10, 0])
-    .html(tooltipFn);
+  //
+  // var tip = d3.tip()
+  //   .attr('class', 'd3-tip')
+  //   .offset([-10, 0])
+  //   .html(tooltipFn);
+  //
+  // svg.call(tip);
 
-  svg.call(tip);
-
+  var tooltipDiv = d3.select("body").append("div").attr("class", "d3-tip");
 
   chart.processData = function(data) {
     data = data.data;
@@ -124,8 +121,18 @@ module.exports = function columnChart(chart, svg) {
       // .attr('height', function(d) { return Math.max(5, height - y(Number(d.total))); })
       .attr('y', function(d) { return y(Number(d.total)); })
       .attr('height', function(d) { return chart.height - y(Number(d.total)); })
-      .on('mouseover', tip.show)
-      .on('mouseout', tip.hide)
+      .on("mousemove", function(d){
+        tooltipDiv.style("left", d3.event.pageX+10+"px");
+        tooltipDiv.style("top", d3.event.pageY-25+"px");
+        tooltipDiv.style("display", "inline-block");
+        tooltipDiv.html(tooltipFn(d));
+      })
+      .on("mouseout", function(d){
+        tooltipDiv.style("display", "none");
+      });
+
+      // .on('mouseover', tip.show)
+      // .on('mouseout', tip.hide)
 
     EventBus.emit({source: 'blvd:charts', message: 'ready'});
   };

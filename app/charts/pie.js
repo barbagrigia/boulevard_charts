@@ -40,12 +40,19 @@ module.exports = function pieChart(chart, svg) {
   	.innerRadius(radius * 0.9)
   	.outerRadius(radius * 0.9);
 
-  var div = d3.select("body").append("div").attr("class", "toolTip");
-
+  var div = d3.select("body").append("div").attr("class", "d3-tip");
 
   var colorRange = d3.scale.category20();
   var color = d3.scale.ordinal()
   	.range(colorRange.range());
+
+  function tooltipFn(data) {
+    var isoDay = data.date;
+    var d = new Date(Date.parse(isoDay));
+    var month = monthsOfYear[d.getUTCMonth()];
+    var dateString = month + ' ' + d.getUTCDate();
+    return '<span class=\'date\'>' + dateString + '</span>' + '<br/><span> $' + Formatters.formatMoney(data.total) + '</span>'
+  }
 
   chart.processData = function(data) {
     var aggregationKey = data.aggregation.key;
@@ -97,10 +104,10 @@ module.exports = function pieChart(chart, svg) {
       })
     slice
       .on("mousemove", function(d){
-        div.style("left", d3.event.pageX+10+"px");
+        div.style("left", d3.event.pageX+10+"px"); 
         div.style("top", d3.event.pageY-25+"px");
         div.style("display", "inline-block");
-        div.html((d.data[aggregationKey])+"<br> $"+Formatters.formatMoney(d.data[aggregate]));
+        div.html('<span class=\'date\'>' + d.data[aggregationKey] + '</span>' + '<br/><span> $' + Formatters.formatMoney(d.data[aggregate]) + '</span>');
       });
     slice
       .on("mouseout", function(d){
