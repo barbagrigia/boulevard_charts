@@ -16,9 +16,7 @@ module.exports = function pieChart(chart, svg) {
   g.append("g")
     .attr("class", "slices");
   g.append("g")
-    .attr("class", "labelName");
-  g.append("g")
-    .attr("class", "labelValue");
+    .attr("class", "labels");
   g.append("g")
     .attr("class", "lines");
 
@@ -35,8 +33,8 @@ module.exports = function pieChart(chart, svg) {
   	.innerRadius(radius * 0.4);
 
   var outerArc = d3.arc()
-  	.innerRadius(radius * 0.9)
-  	.outerRadius(radius * 0.9);
+  	.outerRadius(radius * 0.9)
+  	.innerRadius(radius * 0.9);
 
   var div = d3.select("body").append("div").attr("class", "d3-tip");
 
@@ -97,81 +95,52 @@ module.exports = function pieChart(chart, svg) {
         div.style("display", "none");
       });
 
-    slice.exit().remove();
+    slice.exit()
+      .remove();
 
-    /* ------- LEGEND -------*/
-    //
-    // var legendRectSize = (radius * 0.05);
-    // var legendSpacing = radius * 0.02;
-    // var legend = svg.selectAll('.legend')
-    // .data(color.domain())
-    // .enter()
-    // .append('g')
-    // .attr('class', 'legend')
-    // .attr('transform', function(d, i) {
-    //   var height = legendRectSize + legendSpacing;
-    //   var offset =  height * color.domain().length / 2;
-    //   var horz = -3 * legendRectSize;
-    //   var vert = i * height - offset;
-    //   return 'translate(' + horz + ',' + vert + ')';
-    // });
-    //
-    // legend.append('rect')
-    //     .attr('width', legendRectSize)
-    //     .attr('height', legendRectSize)
-    //     .style('fill', color)
-    //     .style('stroke', color);
-    //
-    // legend.append('text')
-    //     .attr('x', legendRectSize + legendSpacing)
-    //     .attr('y', legendRectSize - legendSpacing)
-    //     .text(function(d) { return d; });
 
-    /* ------- TEXT LABELS -------*/
+	/* ------- TEXT LABELS -------*/
 
-    // var text = g.select(".labelName").selectAll("text")
-    //   .data(pie(data), function(d){ return d.data[aggregationKey] });
-    //
-    // text.enter()
-    //   .append("text")
-    //   .attr("dy", ".35em")
-    //   .text(function(d) {
-    //     return (d.data[aggregationKey]+": "+d.data.percentage+"%");
-    //   });
-    //
-    // function midAngle(d){
-    //   return d.startAngle + (d.endAngle - d.startAngle)/2;
-    // }
-    //
-    // text
-    //   .transition().duration(1000)
-    //   .attrTween("transform", function(d) {
-    //     this._current = this._current || d;
-    //     var interpolate = d3.interpolate(this._current, d);
-    //     this._current = interpolate(0);
-    //     return function(t) {
-    //       var d2 = interpolate(t);
-    //       var pos = outerArc.centroid(d2);
-    //       pos[0] = radius * (midAngle(d2) < Math.PI ? 1 : -1);
-    //       return "translate("+ pos +")";
-    //     };
-    //   })
-    //   .styleTween("text-anchor", function(d){
-    //     this._current = this._current || d;
-    //     var interpolate = d3.interpolate(this._current, d);
-    //     this._current = interpolate(0);
-    //     return function(t) {
-    //       var d2 = interpolate(t);
-    //       return midAngle(d2) < Math.PI ? "start":"end";
-    //     };
-    //   })
-    //   .text(function(d) {
-    //     return (d.data[aggregationKey]+": "+d.data.percentage+"%");
-    //   });
-    //
-    //
-    // text.exit()
-    //   .remove();
+    // var key = function(d){ return d.data[aggregationKey]; };
+    var textFn = function(d) { return (d.data[aggregationKey]+": "+d.data.percentage+"%"); };
+
+    var text = g.select('.labels').selectAll('text').data(function(d){ return pie(data); });
+
+    function midAngle(d){
+      return d.startAngle + (d.endAngle - d.startAngle)/2;
+    }
+
+    text.enter()
+      .append('text')
+      .attr('dy', '.35em')
+      .text(textFn)
+      .attr('transform', function(d) {
+        var pos = outerArc.centroid(d);
+        pos[0] = radius * (midAngle(d) < Math.PI ? 1 : -1);
+        return 'translate(' + pos + ')';
+      })
+      .attr('text-anchor', function(d) {
+        return midAngle(d) < Math.PI ? "start":"end";
+      });
+
+    text.exit()
+  		.remove();
+
+
+    /* ------- SLICE TO TEXT POLYLINES -------*/
+
+  	var polyline = svg.select(".lines").selectAll("polyline").data(function(d){ return pie(data); });
+
+  	polyline.enter()
+  		.append('polyline')
+      .attr('points', function(d) {
+  			var pos = outerArc.centroid(d);
+  			pos[0] = radius * 0.95 * (midAngle(d) < Math.PI ? 1 : -1);
+  			return [arc.centroid(d), outerArc.centroid(d), pos].join(',');
+  		});
+
+  	polyline.exit()
+  		.remove();
 
     EventBus.emit({source: 'blvd:charts', message: 'ready'});
   };

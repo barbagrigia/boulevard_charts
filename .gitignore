@@ -6,7 +6,7 @@
 
 # The directory Mix downloads your dependencies sources to.
 /deps
-
+/lib/boulevard_charts/templates/*.map
 # Where 3rd-party dependencies like ExDoc output generated docs.
 /doc
 
